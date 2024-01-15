@@ -19,14 +19,17 @@ public class RequestHandler implements Runnable {
     }
 
     public void run() {
-        logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+        logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
 
+            // HTTP 요청 전체를 읽고 로그로 출력
+            String httpRequest = readHttpRequest(in);
+            logger.debug("Received HTTP Request:\n{}", httpRequest);
+
             // 요청 URL 추출
-            String url = extractUrl(in);
+            String url = extractUrl(httpRequest);
             if (url.equals("/")) {
                 url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
             }
@@ -43,6 +46,7 @@ public class RequestHandler implements Runnable {
             logger.error(e.getMessage());
         }
     }
+
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
@@ -63,14 +67,11 @@ public class RequestHandler implements Runnable {
             logger.error(e.getMessage());
         }
     }
-    private String extractUrl(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String line = br.readLine();
-        if (line != null && !line.isEmpty()) {
-            return line.split(" ")[1]; // "GET /index.html HTTP/1.1"에서 "/index.html" 추출
-        }
-        return "/";
+    private String extractUrl(String httpRequest) {
+        String requestLine = httpRequest.split("\n")[0]; // 첫 번째 라인 추출
+        return requestLine.split(" ")[1]; // "GET /index.html HTTP/1.1"에서 "/index.html" 추출
     }
+
     private byte[] readFile(String filePath) {
         try {
             Path path = Paths.get(filePath).normalize();
@@ -92,4 +93,14 @@ public class RequestHandler implements Runnable {
             logger.error(e.getMessage());
         }
     }
+    private String readHttpRequest(InputStream in) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+        StringBuilder requestBuilder = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            requestBuilder.append(line).append("\n");
+        }
+        return requestBuilder.toString();
+    }
+
 }

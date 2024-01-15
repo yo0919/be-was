@@ -30,16 +30,28 @@ public class RequestHandler implements Runnable {
     }
 
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String url) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Type: " + getContentType(url) + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
     }
+
+    private String getContentType(String url) {
+        if (url.endsWith(".css")) {
+            return "text/css";
+        } else if (url.endsWith(".js")) {
+            return "application/javascript";
+        } else if (url.endsWith(".html") || url.endsWith(".htm")) {
+            return "text/html;charset=utf-8";
+        }
+        return "text/plain;charset=utf-8";
+    }
+
 
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
@@ -52,10 +64,23 @@ public class RequestHandler implements Runnable {
 
     private void processRequest(InputStream in, DataOutputStream dos) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String line = br.readLine();
+        StringBuilder requestHeaders = new StringBuilder();
+        String line;
+
+        // HTTP 요청의 첫 줄 (요청 라인) 읽기
+        line = br.readLine();
+        requestHeaders.append(line).append("\n");
+
+        // HTTP 요청 헤더 읽기
+        while ((line = br.readLine()) != null && !line.isEmpty()) {
+            requestHeaders.append(line).append("\n");
+        }
+
+        // 요청 라인과 헤더를 로그로 출력
+        logger.debug("Received HTTP Request:\n{}", requestHeaders.toString());
 
         // 요청 라인에서 URL 추출
-        String url = extractUrl(line);
+        String url = extractUrl(requestHeaders.toString().split("\n")[0]);
 
         // 해당 파일 읽기
         byte[] body = readFile(url);
@@ -65,10 +90,11 @@ public class RequestHandler implements Runnable {
             response404Header(dos);
         } else {
             // 정상적인 경우, 응답 처리
-            response200Header(dos, body.length);
+            response200Header(dos, body.length, url);
             responseBody(dos, body);
         }
     }
+
 
     private String extractUrl(String requestLine) {
         String[] tokens = requestLine.split(" ");
@@ -79,14 +105,30 @@ public class RequestHandler implements Runnable {
     }
 
     private byte[] readFile(String url) {
+        // 클라이언트가 루트 URL에 접근할 경우 index.html을 반환
+        if (url.equals("/")) {
+            url = "/index.html";
+        }
+
+        Path filePath;
+        if (url.startsWith("/css/") || url.startsWith("/js/")) {
+            filePath = Paths.get("./src/main/resources/static", url);
+        } else {
+            filePath = Paths.get("./src/main/resources/templates", url);
+        }
+
         try {
-            Path filePath = Paths.get("./src/main/resources/templates", url);
-            return Files.readAllBytes(filePath);
+            if (!Files.isDirectory(filePath) && Files.exists(filePath)) {
+                return Files.readAllBytes(filePath);
+            }
         } catch (IOException e) {
             logger.error("File reading error: " + e.getMessage());
-            return null;
         }
+        return null;
     }
+
+
+
 
     private void response404Header(DataOutputStream dos) {
         try {

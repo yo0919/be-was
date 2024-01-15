@@ -15,4 +15,7 @@ Q2. git의 객체에는 무엇이 있을까?
 A2. Blob tree commit Tag
 commit 안에는 blob과 tree가 들어있다.
 
-Q3. 
+Q3. 저장은 어느시점부터될까? 파일 만드는시점? Git add? commit? + 각 명령어의 기능
+A3. 
+stage는 무엇인가? - 커밋을 만들기위한 준비공간
+commit이 뭔데? 일종의 세이브 포인트? 우리의 작업내용의 스냅샷

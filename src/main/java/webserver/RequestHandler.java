@@ -2,10 +2,13 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,4 +106,35 @@ public class RequestHandler implements Runnable {
         return requestBuilder.toString();
     }
 
+    private User createUserFromRequest(String url) {
+        String queryString = url.split("\\?")[1];//? 문자는 정규표현식의 예약어이기 때문에 split() 메소드를 사용할 때 "?"이 아닌 "\\?"를 사용
+        String[] params = queryString.split("&");//&을 기준으로 쿼리 스트링을 파라미터들로 분리
+
+        String userId = "";
+        String password = "";
+        String name = "";
+        String email = "";
+
+        for (String param : params) {
+            String[] keyValue = param.split("=");
+            if (keyValue.length != 2) {
+                continue; // 키와 밸류 둘다 있는게 아니면 건너뛰기
+            }
+
+            String key = keyValue[0];
+            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+
+            if ("userId".equals(key)) {
+                userId = value;
+            } else if ("password".equals(key)) {
+                password = value;
+            } else if ("name".equals(key)) {
+                name = value;
+            } else if ("email".equals(key)) {
+                email = value;
+            }
+        }
+
+        return new User(userId, password, name, email);
+    }
 }

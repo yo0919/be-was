@@ -33,17 +33,29 @@ public class RequestHandler implements Runnable {
 
             // 요청 URL 추출
             String url = extractUrl(httpRequest);
-            if (url.equals("/")) {
-                url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
-            }
+            // /user/create 경로로의 요청 처리
+            if (url.startsWith("/user/create")) {
+                User user = createUserFromRequest(url);
 
-            // 파일 읽기
-            byte[] body = readFile("src/main/resources/templates" + url);
-            if (body == null) {
-                response404Header(dos); // 파일이 없을 경우 404 응답
+                // User 객체를 로그에 출력
+                logger.debug("User created: {}", user);
+
+                String successResponse = "회원가입 성공";
+                response200Header(dos, successResponse.getBytes().length);
+                responseBody(dos, successResponse.getBytes());
             } else {
-                response200Header(dos, body.length);
-                responseBody(dos, body);
+                // 기존의 정적 파일 처리 로직
+                if (url.equals("/")) {
+                    url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
+                }
+
+                byte[] body = readFile("src/main/resources/templates" + url);
+                if (body == null) {
+                    response404Header(dos); // 파일이 없을 경우 404 응답
+                } else {
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+                }
             }
         } catch (IOException e) {
             logger.error(e.getMessage());

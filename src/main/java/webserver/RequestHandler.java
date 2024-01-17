@@ -90,23 +90,6 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String extractUrl(String httpRequest) {
-        String requestLine = httpRequest.split("\n")[0]; // 첫 번째 라인 추출
-        return requestLine.split(" ")[1]; // "GET /index.html HTTP/1.1"에서 "/index.html" 추출
-    }
-
-    private byte[] readFile(String filePath) {
-        try {
-            Path path = Paths.get(filePath).normalize();
-            if (Files.exists(path)) {
-                return Files.readAllBytes(path);
-            }
-        } catch (IOException e) {
-            logger.error("File reading error: " + e.getMessage());
-        }
-        return null;
-    }
-
     private void response404Header(DataOutputStream dos) {
         try {
             dos.writeBytes("HTTP/1.1 404 Not Found\r\n");

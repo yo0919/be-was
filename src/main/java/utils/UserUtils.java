@@ -8,21 +8,20 @@ import java.util.Map;
 
 public class UserUtils {
 
-    public static User createUserFromRequest(String url) {
-        String queryString = url.split("\\?")[1];
-        String[] params = queryString.split("&");
-
+    public static User createUserFromRequest(String queryString) {
         Map<String, String> paramMap = new HashMap<>();
 
-        for (String param : params) {
-            String[] keyValue = param.split("=");
-            if (keyValue.length != 2) {
-                continue;
-            }
+        if (queryString != null && !queryString.isEmpty()) {
+            String[] params = queryString.split("&");
 
-            String key = keyValue[0];
-            String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-            paramMap.put(key, value);
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length == 2) {
+                    String key = keyValue[0];
+                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    paramMap.put(key, value);
+                }
+            }
         }
 
         return new User(

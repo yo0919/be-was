@@ -3,6 +3,8 @@ package utils;
 import model.User;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserUtils {
 
@@ -10,10 +12,7 @@ public class UserUtils {
         String queryString = url.split("\\?")[1];
         String[] params = queryString.split("&");
 
-        String userId = "";
-        String password = "";
-        String name = "";
-        String email = "";
+        Map<String, String> paramMap = new HashMap<>();
 
         for (String param : params) {
             String[] keyValue = param.split("=");
@@ -23,19 +22,14 @@ public class UserUtils {
 
             String key = keyValue[0];
             String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-
-            if ("userId".equals(key)) {
-                userId = value;
-            } else if ("password".equals(key)) {
-                password = value;
-            } else if ("name".equals(key)) {
-                name = value;
-            } else if ("email".equals(key)) {
-                email = value;
-            }
+            paramMap.put(key, value);
         }
 
-        return new User(userId, password, name, email);
+        return new User(
+                paramMap.getOrDefault("userId", ""),
+                paramMap.getOrDefault("password", ""),
+                paramMap.getOrDefault("name", ""),
+                paramMap.getOrDefault("email", "")
+        );
     }
 }
-

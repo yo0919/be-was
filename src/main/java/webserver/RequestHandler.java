@@ -2,24 +2,17 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import model.User;
+import controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileUtils;
 import utils.HttpUtils;
-import utils.UserUtils;
+
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-
     private Socket connection;
-
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
@@ -36,36 +29,33 @@ public class RequestHandler implements Runnable {
 
             // 요청 URL 추출
             String url = HttpUtils.extractUrl(httpRequest);
-            // /user/create 경로로의 요청 처리
+
+            // UserController 인스턴스 생성
+            UserController userController = new UserController();
+
+            // URL 경로에 따른 처리
             if (url.startsWith("/user/create")) {
-                User user = UserUtils.createUserFromRequest(url);
-
-                // User 객체를 로그에 출력
-                logger.debug("User created: {}", user);
-
-                String successResponse = "회원가입 성공";
-                response200Header(dos, successResponse.getBytes().length);
-                responseBody(dos, successResponse.getBytes());
+                byte[] responseBody = userController.createUser(url);
+                response200Header(dos, responseBody.length);
+                responseBody(dos, responseBody);
             } else {
-                // 기존의 정적 파일 처리 로직
-                if (url.equals("/")) {
-                    url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
-                }
-                try {
-                    byte[] body = FileUtils.readFile("src/main/resources/templates" + url);
-                    if (body == null) {
-                        response404Header(dos); // 파일이 없을 경우 404 응답
-                    } else {
-                        response200Header(dos, body.length);
-                        responseBody(dos, body);
-                    }
-                } catch (IOException e) {
-                    logger.error("File reading error: " + e.getMessage());
-                    response404Header(dos); // 파일 읽기 오류 발생 시 404 응답
-                }
+                handleStaticFile(url, dos);
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error processing request: ", e);
+        }
+    }
+
+    private void handleStaticFile(String url, DataOutputStream dos) throws IOException {
+        if (url.equals("/")) {
+            url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
+        }
+        byte[] body = FileUtils.readFile("src/main/resources/templates" + url);
+        if (body == null) {
+            response404Header(dos); // 파일이 없을 경우 404 응답
+        } else {
+            response200Header(dos, body.length);
+            responseBody(dos, body);
         }
     }
 

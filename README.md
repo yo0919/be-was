@@ -52,3 +52,15 @@ A8. NO (깃에서 똑같은 파일을 여러개만들어도 더이상의 blob이
   - DNS캐싱으로 인해 계속해서 잘못된 접근을 할수도있다.
   - 하지만 항상 DNS요청을 하기엔 부하가 걸리기에 사용하는것이다.
   - 그럼 오류가 생길땐 어떻게하나? 주기적으로 dns서버에 요청하여 캐쉬를 전체업데이트!
+* OSI 7계층
+  - 7계층(application layer) : 사용자가 이해할수 있는 인터페이스   
+    -대표 프로토콜 : HTTP
+  - 4계층(transport layer)    
+    -대표 프로토콜 : TCP,UDP,~~IP~~(네트워크레이어)
+    TCP와 UDP의 가장 큰 차이? 보안의 정도
+* HTTP
+  - 특징 : stateless, coneectionless, self-descriptive, uniformed(protocol)
+  - 크게 request와 response로 구분가능, RESTful(Representational State Transfer)
+    + Request : method, URL/path, HTTP version
+    * method : GET, POST, PATCH, PUT, DELETE(결국 CRUD)
+      PUT,PATCH는 둘다 수정을 위한것이지만, PUT은 전체수정, PATCH는 부분수정

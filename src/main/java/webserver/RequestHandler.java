@@ -11,6 +11,8 @@ import java.nio.file.Paths;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.FileUtils;
+import utils.HttpUtils;
 import utils.UserUtils;
 
 public class RequestHandler implements Runnable {
@@ -33,7 +35,7 @@ public class RequestHandler implements Runnable {
             logger.debug("Received HTTP Request:\n{}", httpRequest);
 
             // 요청 URL 추출
-            String url = extractUrl(httpRequest);
+            String url = HttpUtils.extractUrl(httpRequest);
             // /user/create 경로로의 요청 처리
             if (url.startsWith("/user/create")) {
                 User user = UserUtils.createUserFromRequest(url);
@@ -49,13 +51,17 @@ public class RequestHandler implements Runnable {
                 if (url.equals("/")) {
                     url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
                 }
-
-                byte[] body = readFile("src/main/resources/templates" + url);
-                if (body == null) {
-                    response404Header(dos); // 파일이 없을 경우 404 응답
-                } else {
-                    response200Header(dos, body.length);
-                    responseBody(dos, body);
+                try {
+                    byte[] body = FileUtils.readFile("src/main/resources/templates" + url);
+                    if (body == null) {
+                        response404Header(dos); // 파일이 없을 경우 404 응답
+                    } else {
+                        response200Header(dos, body.length);
+                        responseBody(dos, body);
+                    }
+                } catch (IOException e) {
+                    logger.error("File reading error: " + e.getMessage());
+                    response404Header(dos); // 파일 읽기 오류 발생 시 404 응답
                 }
             }
         } catch (IOException e) {
@@ -82,23 +88,6 @@ public class RequestHandler implements Runnable {
         } catch (IOException e) {
             logger.error(e.getMessage());
         }
-    }
-
-    private String extractUrl(String httpRequest) {
-        String requestLine = httpRequest.split("\n")[0]; // 첫 번째 라인 추출
-        return requestLine.split(" ")[1]; // "GET /index.html HTTP/1.1"에서 "/index.html" 추출
-    }
-
-    private byte[] readFile(String filePath) {
-        try {
-            Path path = Paths.get(filePath).normalize();
-            if (Files.exists(path)) {
-                return Files.readAllBytes(path);
-            }
-        } catch (IOException e) {
-            logger.error("File reading error: " + e.getMessage());
-        }
-        return null;
     }
 
     private void response404Header(DataOutputStream dos) {

@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.Socket;
 
 import controller.UserController;
+import http.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.FileUtils;
@@ -14,6 +15,7 @@ import http.HttpResponse;
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private Socket connection;
+
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
@@ -23,7 +25,7 @@ public class RequestHandler implements Runnable {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
-            String httpRequestString = readHttpRequest(in);
+            String httpRequestString = HttpUtils.readHttpRequest(in);
             HttpRequest request = new HttpRequest(httpRequestString);
             HttpResponse response = new HttpResponse();
 
@@ -57,15 +59,5 @@ public class RequestHandler implements Runnable {
             response.setHeader("Content-Type", "text/html;charset=utf-8");
             response.setBody(body);
         }
-    }
-
-    private String readHttpRequest(InputStream in) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-        StringBuilder requestBuilder = new StringBuilder();
-        String line;
-        while ((line = br.readLine()) != null && !line.isEmpty()) {
-            requestBuilder.append(line).append("\n");
-        }
-        return requestBuilder.toString();
     }
 }

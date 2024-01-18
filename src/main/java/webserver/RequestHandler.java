@@ -2,18 +2,18 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
+import controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.FileUtils;
+import http.HttpRequest;
+import http.HttpResponse;
+
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-
     private Socket connection;
-
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
@@ -23,76 +23,42 @@ public class RequestHandler implements Runnable {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             DataOutputStream dos = new DataOutputStream(out);
+            String httpRequestString = readHttpRequest(in);
+            HttpRequest request = new HttpRequest(httpRequestString);
+            HttpResponse response = new HttpResponse();
 
-            // HTTP 요청 전체를 읽고 로그로 출력
-            String httpRequest = readHttpRequest(in);
-            logger.debug("Received HTTP Request:\n{}", httpRequest);
+            // UserController 인스턴스 생성
+            UserController userController = new UserController();
 
-            // 요청 URL 추출
-            String url = extractUrl(httpRequest);
-            if (url.equals("/")) {
-                url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
-            }
-
-            // 파일 읽기
-            byte[] body = readFile("src/main/resources/templates" + url);
-            if (body == null) {
-                response404Header(dos); // 파일이 없을 경우 404 응답
+            // 요청 경로에 따라 처리
+            if (request.getPath().startsWith("/user/create")) {
+                userController.createUser(request, response);
             } else {
-                response200Header(dos, body.length);
-                responseBody(dos, body);
+                // 정적 파일 처리
+                handleStaticFile(request.getPath(), response);
             }
+
+            // 응답 전송
+            response.send(dos);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error processing request: ", e);
         }
     }
 
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
+    private void handleStaticFile(String url, HttpResponse response) throws IOException {
+        if (url.equals("/")) {
+            url = "/index.html"; // 루트 URL 요청 시, index.html로 변경
+        }
+        byte[] body = FileUtils.readFile("src/main/resources/templates" + url);
+        if (body == null) {
+            response.setStatusCode(404); // 파일이 없을 경우 404 응답
+        } else {
+            response.setStatusCode(200); // 200 OK 응답
+            response.setHeader("Content-Type", "text/html;charset=utf-8");
+            response.setBody(body);
         }
     }
 
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
-    private String extractUrl(String httpRequest) {
-        String requestLine = httpRequest.split("\n")[0]; // 첫 번째 라인 추출
-        return requestLine.split(" ")[1]; // "GET /index.html HTTP/1.1"에서 "/index.html" 추출
-    }
-
-    private byte[] readFile(String filePath) {
-        try {
-            Path path = Paths.get(filePath).normalize();
-            if (Files.exists(path)) {
-                return Files.readAllBytes(path);
-            }
-        } catch (IOException e) {
-            logger.error("File reading error: " + e.getMessage());
-        }
-        return null;
-    }
-
-    private void response404Header(DataOutputStream dos) {
-        try {
-            dos.writeBytes("HTTP/1.1 404 Not Found\r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            logger.error(e.getMessage());
-        }
-    }
     private String readHttpRequest(InputStream in) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
         StringBuilder requestBuilder = new StringBuilder();
@@ -102,5 +68,4 @@ public class RequestHandler implements Runnable {
         }
         return requestBuilder.toString();
     }
-
 }

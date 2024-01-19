@@ -5,11 +5,22 @@ import http.Mime;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 public class StaticFileUtils {
     private static final Logger logger = LoggerFactory.getLogger(StaticFileUtils.class);
     private static final String TEMPLATE_ROOT = "src/main/resources/templates";
     private static final String STATIC_ROOT = "src/main/resources/static";
+    private static final Set<String> STATIC_PATHS = new HashSet<>();
+    static {
+        // 정적 리소스 경로 초기화
+        STATIC_PATHS.add("/css/");
+        STATIC_PATHS.add("/js/");
+        STATIC_PATHS.add("/fonts/");
+        STATIC_PATHS.add("/images/");
+        STATIC_PATHS.add("/favicon.ico");
+    }
 
     public static void handleStaticFile(String url, HttpResponse response) throws IOException {
         String filePath = determineFilePath(url);
@@ -31,13 +42,13 @@ public class StaticFileUtils {
         if (url.equals("/")) {
             return TEMPLATE_ROOT + "/index.html"; // 루트 URL 요청 시 index.html로 변경
         }
-        if (url.startsWith("/css/") || url.startsWith("/js/") || url.startsWith("/fonts/") || url.startsWith("/images/") || url.equals("/favicon.ico")) {
-            return STATIC_ROOT + url; // 정적 리소스 경로로 시작하는 경우 (css, js, fonts, images, favicon.ico)
+        for (String staticPath : STATIC_PATHS) {
+            if (url.startsWith(staticPath) || url.equals(staticPath)) {
+                return STATIC_ROOT + url; // 정적 리소스 경로로 시작하는 경우
+            }
         }
         return TEMPLATE_ROOT + url; // 그 외의 경우는 'templates' 경로
     }
-
-
     private static String getFileExtension(String fileName) {
         int lastIndexOfDot = fileName.lastIndexOf(".");
         if (lastIndexOfDot == -1) {

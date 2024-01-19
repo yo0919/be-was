@@ -31,10 +31,11 @@ public class StaticFileUtils {
         if (url.equals("/")) {
             return TEMPLATE_ROOT + "/index.html"; // 루트 URL 요청 시 index.html로 변경
         }
-        if (url.startsWith("/static/")) {
-            return STATIC_ROOT + url.substring(7); // 'static' 경로로 시작하는 경우
+        if (url.startsWith("/css/") || url.startsWith("/js/")) {
+            String resourcePath = url.startsWith("/static/") ? url.substring(7) : url;
+            return STATIC_ROOT + resourcePath; // '/css/', '/js/' 경로로 시작하는 경우
         }
-        return TEMPLATE_ROOT + url; // 기본적으로는 'templates' 경로
+        return TEMPLATE_ROOT + url; // 그 외의 경우는 'templates' 경로
     }
 
     private static String getFileExtension(String fileName) {

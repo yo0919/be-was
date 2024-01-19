@@ -16,7 +16,7 @@ public class UserController {
         System.out.println("User created: " + user);
 
         // 회원가입 성공 후 리디렉션 응답 설정
-        response.setStatusCode(302); // HTTP 상태 코드 302 설정
+        response.setStatusCode(303); // HTTP 상태 코드 302 설정
         response.setHeader("Location", "/index.html"); // 리디렉션할 페이지 설정
     }
 }

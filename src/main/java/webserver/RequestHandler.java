@@ -3,7 +3,7 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import controller.UserController;
-import http.HttpUtils;
+import utils.HttpUtils;
 import http.HttpRequest;
 import http.HttpResponse;
 import org.slf4j.Logger;

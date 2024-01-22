@@ -9,9 +9,11 @@ public class HttpRequest {
     private String path;
     private Map<String, String> headers;
     private String body;
+    private Map<String, String> bodyParams; // POST 요청의 본문 파라미터를 저장할 Map
 
     public HttpRequest(String requestText) {
         this.headers = new HashMap<>();
+        this.bodyParams = new HashMap<>();
         parseRequest(requestText);
     }
 
@@ -27,6 +29,7 @@ public class HttpRequest {
 
         if (tokenizer.hasMoreTokens()) {
             this.body = tokenizer.nextToken();
+            parseBody(); // POST 요청의 본문 파싱
         }
     }
 
@@ -44,6 +47,31 @@ public class HttpRequest {
             this.headers.put(key, value);
         }
     }
+
+    // POST 요청 본문 파싱
+    private void parseBody() {
+        if ("POST".equalsIgnoreCase(this.method) && this.headers.containsKey("Content-Type")) {
+            String contentType = this.headers.get("Content-Type");
+            if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentType)) {
+                parseUrlEncodedBody();
+            }
+            // 필요한 경우 다른 Content-Type에 대한 처리 로직 추가
+        }
+    }
+
+    // URL 인코딩된 본문 파싱
+    private void parseUrlEncodedBody() {
+        if (this.body != null && !this.body.isEmpty()) {
+            String[] pairs = this.body.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=");
+                if (keyValue.length == 2) {
+                    this.bodyParams.put(keyValue[0], keyValue[1]); // 본문 파라미터 저장
+                }
+            }
+        }
+    }
+
     // Getter
     public String getMethod() {
         return method;
@@ -59,6 +87,10 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Map<String, String> getBodyParams() {
+        return bodyParams; // 본문 파라미터 반환
     }
 
     public String getQueryString() {

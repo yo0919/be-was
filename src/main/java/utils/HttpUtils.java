@@ -1,5 +1,4 @@
-// http 패키지 내의 HttpUtils 클래스
-package http;
+package utils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

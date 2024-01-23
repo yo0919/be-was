@@ -1,12 +1,14 @@
 package http.request;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 
 public class HttpRequestParserTest {
 
     @Test
+    @DisplayName("POST 요청 문자열 파싱 테스트")
     public void parseHttpRequestTest() {
         // 테스트를 위한 HTTP 요청 문자열 예시
         String requestText = "POST /user/create HTTP/1.1\n" +

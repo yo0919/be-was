@@ -1,24 +1,22 @@
 package controller;
 
-import http.response.HttpResponse;
-import http.request.HttpRequest;
+import http.HttpResponse;
+import http.HttpRequest;
 import model.User;
 import utils.UserUtils;
 
-import java.util.Map;
-
 public class UserController {
     public void createUser(HttpRequest request, HttpResponse response) {
-        // 'POST' 요청일 경우 본문 데이터를 사용하여 User 객체 생성
-        if ("POST".equalsIgnoreCase(request.getMethod())) {
-            Map<String, String> formData = request.getBodyParams();
-            User user = UserUtils.createUserFromRequest(formData);
+        // URL에서 쿼리 문자열을 가져옴
+        String queryString = request.getQueryString();
 
-            System.out.println("User created: " + user);
+        // URL 대신 쿼리 문자열을 사용하여 User 객체 생성
+        User user = UserUtils.createUserFromRequest(queryString);
 
-            // 회원가입 성공 후 리디렉션 응답 설정
-            response.setStatusCode(302); // HTTP 상태 코드 302 설정
-            response.setHeader("Location", "/index.html"); // 리디렉션할 페이지 설정
-        }
+        System.out.println("User created: " + user);
+
+        // 회원가입 성공 후 리디렉션 응답 설정
+        response.setStatusCode(302); // HTTP 상태 코드 302 설정
+        response.setHeader("Location", "/index.html"); // 리디렉션할 페이지 설정
     }
 }

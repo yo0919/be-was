@@ -1,7 +1,5 @@
 package http;
 
-import java.util.Arrays;
-
 public enum Mime {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
@@ -24,9 +22,11 @@ public enum Mime {
     }
 
     public static Mime convertMime(String ext) {
-        return Arrays.stream(Mime.values())
-                .filter(m -> m.extension.equalsIgnoreCase(ext))
-                .findFirst()
-                .orElse(Mime.NONE);
+        for (Mime m : Mime.values()) {
+            if (m.extension.equalsIgnoreCase(ext)) {
+                return m;
+            }
+        }
+        return Mime.NONE;
     }
 }

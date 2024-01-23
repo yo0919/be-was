@@ -1,6 +1,6 @@
 package utils;
 
-import http.HttpResponse;
+import http.response.HttpResponse;
 import http.Mime;
 import java.io.IOException;
 import org.slf4j.Logger;

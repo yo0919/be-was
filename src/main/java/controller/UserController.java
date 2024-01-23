@@ -1,7 +1,7 @@
 package controller;
 
-import http.HttpResponse;
-import http.HttpRequest;
+import http.response.HttpResponse;
+import http.request.HttpRequest;
 import model.User;
 import utils.UserUtils;
 

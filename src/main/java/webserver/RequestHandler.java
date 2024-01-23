@@ -4,8 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import controller.UserController;
 import utils.HttpUtils;
-import http.HttpRequest;
-import http.HttpResponse;
+import http.request.HttpRequest;
+import http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.StaticFileUtils; // StaticFileUtils를 import 합니다.

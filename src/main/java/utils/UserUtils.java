@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 public class UserUtils {
-    private static final Logger logger = LoggerFactory.getLogger(UserUtils.class);
 
     public static User createUserFromRequest(Map<String, String> paramMap) {
         String userId = paramMap.getOrDefault("userId", "");

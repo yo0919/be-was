@@ -7,7 +7,6 @@ public class HttpRequest {
     private String method;
     private String path;
     private Map<String, String> headers;
-    private String body;
     private Map<String, String> bodyParams;
 
     public HttpRequest(String requestText) {
@@ -40,10 +39,6 @@ public class HttpRequest {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 
     public void setHeaders(Map<String, String> headers) {

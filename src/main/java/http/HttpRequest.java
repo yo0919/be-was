@@ -20,35 +20,28 @@ public class HttpRequest {
     }
 
     private void parseRequest(String requestText) {
-        System.out.println("Request Text: \n" + requestText);
-        System.out.println("parseRequest Called");
         StringTokenizer tokenizer = new StringTokenizer(requestText, "\n");
         parseRequestLine(tokenizer.nextToken());
-        System.out.println("tokenizer: "+tokenizer);
 
         while (tokenizer.hasMoreTokens()) {
             String line = tokenizer.nextToken();
-            System.out.println("line: " + line);
             if (line.equals("\r")) break; // 헤더의 끝을 만났을 때
             parseHeader(line);
         }
 
         if (tokenizer.hasMoreTokens()) {
             this.body = tokenizer.nextToken();
-            System.out.println("Parsed Body: " + this.body); // 본문 로깅
             parseBody(); // POST 요청의 본문 파싱
         }
     }
 
     private void parseRequestLine(String requestLine) {
-        System.out.println("Parsed Request Line: " + requestLine);
         StringTokenizer tokenizer = new StringTokenizer(requestLine);
         this.method = tokenizer.nextToken();
         this.path = tokenizer.nextToken();
     }
 
     private void parseHeader(String headerLine) {
-        System.out.println("Parsed Header: " + headerLine);
         int idx = headerLine.indexOf(":");
         if (idx != -1) {
             String key = headerLine.substring(0, idx).trim();
@@ -59,7 +52,6 @@ public class HttpRequest {
 
     // POST 요청 본문 파싱
     private void parseBody() {
-        System.out.println("Parsing Body...");
         if ("POST".equalsIgnoreCase(this.method) && this.headers.containsKey("Content-Type")) {
             String contentType = this.headers.get("Content-Type");
             if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentType)) {
@@ -72,7 +64,6 @@ public class HttpRequest {
 // URL 인코딩된 본문 파싱
     private void parseUrlEncodedBody() {
         if (this.body != null && !this.body.isEmpty()) {
-            System.out.println("Parsing Body: " + this.body); // 본문 데이터 로깅
             String[] pairs = this.body.split("&");
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=");
@@ -81,7 +72,6 @@ public class HttpRequest {
                     try {
                         String value = URLDecoder.decode(keyValue[1], "UTF-8");
                         this.bodyParams.put(key, value); // 본문 파라미터 저장
-                        System.out.println("Parsed key-value pair: " + key + " = " + value); // 파싱된 키-값 쌍 로깅
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

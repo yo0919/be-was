@@ -15,7 +15,6 @@ public class UserUtils {
         String email = paramMap.getOrDefault("email", "");
 
         User user = new User(userId, password, name, email);
-        logger.info("User created: {}", user); // User 객체 생성 로그
 
         return user;
     }

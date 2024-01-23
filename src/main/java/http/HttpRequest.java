@@ -1,7 +1,7 @@
 package http;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -69,6 +69,7 @@ public class HttpRequest {
     }
 
     // URL 인코딩된 본문 파싱
+// URL 인코딩된 본문 파싱
     private void parseUrlEncodedBody() {
         if (this.body != null && !this.body.isEmpty()) {
             System.out.println("Parsing Body: " + this.body); // 본문 데이터 로깅
@@ -77,13 +78,18 @@ public class HttpRequest {
                 String[] keyValue = pair.split("=");
                 if (keyValue.length == 2) {
                     String key = keyValue[0];
-                    String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                    this.bodyParams.put(key, value); // 본문 파라미터 저장
-                    System.out.println("Parsed key-value pair: " + key + " = " + value); // 파싱된 키-값 쌍 로깅
+                    try {
+                        String value = URLDecoder.decode(keyValue[1], "UTF-8");
+                        this.bodyParams.put(key, value); // 본문 파라미터 저장
+                        System.out.println("Parsed key-value pair: " + key + " = " + value); // 파싱된 키-값 쌍 로깅
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
     }
+
 
     // Getter
     public String getMethod() {
@@ -104,13 +110,5 @@ public class HttpRequest {
 
     public Map<String, String> getBodyParams() {
         return bodyParams; // 본문 파라미터 반환
-    }
-
-    public String getQueryString() {
-        int queryStartIndex = path.indexOf("?");
-        if (queryStartIndex != -1) {
-            return path.substring(queryStartIndex + 1);
-        }
-        return "";
     }
 }

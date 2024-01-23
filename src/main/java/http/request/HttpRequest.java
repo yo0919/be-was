@@ -45,4 +45,12 @@ public class HttpRequest {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setBodyParams(Map<String, String> bodyParams) {
+        this.bodyParams = bodyParams;
+    }
 }

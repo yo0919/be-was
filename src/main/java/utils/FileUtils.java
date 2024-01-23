@@ -20,8 +20,4 @@ public class FileUtils {
         }
         return null;
     }
-
-    public static void writeFile(String filePath, String content) throws IOException {
-        Files.write(Paths.get(filePath), content.getBytes());
-    }
 }

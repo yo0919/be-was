@@ -1,12 +1,11 @@
 package utils;
 
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class FileUtilsTest {
     @Test
@@ -16,8 +15,9 @@ class FileUtilsTest {
 
         byte[] content = FileUtils.readFile(tempFile.toString());
 
-        assertNotNull(content);
-        assertArrayEquals("Hello, World!".getBytes(), content);
+        assertThat(content).isNotNull()
+                .isEqualTo("Hello, World!".getBytes());
+
         // 임시 파일 삭제
         Files.delete(tempFile);
     }
@@ -28,6 +28,6 @@ class FileUtilsTest {
 
         byte[] content = FileUtils.readFile(nonExistingFilePath);
 
-        assertNull(content);
+        assertThat(content).isNull();
     }
 }

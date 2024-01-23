@@ -1,6 +1,5 @@
 package utils;
 
-import java.io.DataOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,5 +13,8 @@ public class FileUtils {
             return Files.readAllBytes(path);
         }
         return null;
+    }
+    public static void writeFile(String filePath, String content) throws IOException {
+        Files.write(Paths.get(filePath), content.getBytes());
     }
 }

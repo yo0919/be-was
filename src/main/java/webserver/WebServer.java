@@ -13,6 +13,7 @@ public class WebServer {
     private static final int THREAD_POOL_SIZE = 50; // 스레드 풀 사이즈 설정
 
     public static void main(String args[]) throws Exception {
+
         int port = 0;
         if (args == null || args.length == 0) {
             port = DEFAULT_PORT;

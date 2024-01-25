@@ -1,6 +1,7 @@
 package http.request;
 
 import http.enums.HttpMethod;
+import http.request.parser.HttpRequestParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ public class HttpRequest {
     private String path;
     private Map<String, String> headers;
     private Map<String, String> bodyParams;
+    private Map<String, String> cookies;
 
     public HttpRequest(String requestText) {
         this.headers = new HashMap<>();
@@ -38,6 +40,9 @@ public class HttpRequest {
         return HttpMethod.valueOf(this.method.toUpperCase());
     }
 
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
     // Setter
     public void setMethod(String method) {
         this.method = method;
@@ -53,5 +58,9 @@ public class HttpRequest {
 
     public void setBodyParams(Map<String, String> bodyParams) {
         this.bodyParams = bodyParams;
+    }
+
+    public void setCookies(Map<String, String> cookies) {
+        this.cookies = cookies;
     }
 }

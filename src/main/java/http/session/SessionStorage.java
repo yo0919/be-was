@@ -1,4 +1,4 @@
-package http;
+package http.session;
 
 import model.User;
 import java.util.Map;
@@ -16,5 +16,9 @@ public class SessionStorage {
 
     public void addSession(String sessionId, User user) {
         sessions.put(sessionId, user);
+    }
+
+    public User getUserBySessionId(String sessionId) {
+        return sessions.get(sessionId);
     }
 }

@@ -43,6 +43,10 @@ public class HttpRequest {
     public Map<String, String> getCookies() {
         return cookies;
     }
+
+    public String getSessionId() {
+        return cookies != null ? cookies.get("sid") : null;
+    }
     // Setter
     public void setMethod(String method) {
         this.method = method;

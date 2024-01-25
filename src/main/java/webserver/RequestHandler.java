@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.HttpUtils;
 import utils.StaticFileUtils;
-
+import http.session.SessionHandler;
+import model.User;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,6 +33,10 @@ public class RequestHandler implements Runnable {
             HttpRequest request = new HttpRequest(httpRequestString);
             HttpResponse response = new HttpResponse();
 
+            // 세션 확인 및 사용자 정보 조회
+            SessionHandler sessionHandler = new SessionHandler();
+            User user = sessionHandler.checkSession(request);
+
             ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
             UserController userController = new UserController();
             controllerMethodMapper.scan(userController);
@@ -41,7 +46,7 @@ public class RequestHandler implements Runnable {
 
             if (method != null) {
                 // 매핑된 컨트롤러 메서드 호출
-                invokeControllerMethod(method, userController, request, response);
+                invokeControllerMethod(method, userController, request, response, user); // 사용자 정보 추가 전달
             } else {
                 // 정적 파일 처리 또는 404 Not Found 처리
                 StaticFileUtils.handleStaticFile(request.getPath(), response);
@@ -54,9 +59,10 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void invokeControllerMethod(Method method, UserController userController, HttpRequest request, HttpResponse response) {
+    private void invokeControllerMethod(Method method, UserController userController, HttpRequest request, HttpResponse response, User user) {
         try {
-            method.invoke(userController, request, response);
+            // 추가된 user 매개변수를 사용하는 로직 구현
+            method.invoke(userController, request, response, user);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("컨트롤러 메서드 호출 에러", e);
         }

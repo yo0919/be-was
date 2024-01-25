@@ -1,5 +1,6 @@
 package controller;
 
+import db.Database;
 import http.annotation.PostMapping;
 import http.response.HttpResponse;
 import http.request.HttpRequest;
@@ -16,6 +17,9 @@ public class UserController {
         Map<String, String> formData = request.getBodyParams();
         User user = UserUtils.createUserFromRequest(formData);
 
+        // User 객체를 데이터베이스에 저장
+        Database.addUser(user);
+
         System.out.println("User created: " + user);
 
         // 회원가입 성공 후 리디렉션 응답 설정
@@ -23,3 +27,4 @@ public class UserController {
         response.setHeader("Location", "/index.html");
     }
 }
+

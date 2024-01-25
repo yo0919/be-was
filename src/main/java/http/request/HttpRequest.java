@@ -1,5 +1,7 @@
 package http.request;
 
+import http.enums.HttpMethod;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +32,10 @@ public class HttpRequest {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return HttpMethod.valueOf(this.method.toUpperCase());
     }
 
     // Setter

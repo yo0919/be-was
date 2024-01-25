@@ -1,23 +1,31 @@
 package webserver;
 
-import java.io.*;
-import java.net.Socket;
+import controller.mapping.ControllerMethodMapper;
+import controller.mapping.RequestMappingInfo;
 import controller.UserController;
-import utils.HttpUtils;
 import http.request.HttpRequest;
 import http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.HttpUtils;
 import utils.StaticFileUtils;
+
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.Socket;
 
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
-    private Socket connection;
+    private final Socket connection;
+    private final ControllerMethodMapper controllerMethodMapper;
+    private final UserController userController;
 
-    public RequestHandler(Socket connectionSocket) {
+    public RequestHandler(Socket connectionSocket, ControllerMethodMapper controllerMethodMapper, UserController userController) {
         this.connection = connectionSocket;
+        this.controllerMethodMapper = controllerMethodMapper;
+        this.userController = userController;
     }
-
     public void run() {
         logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
@@ -27,21 +35,29 @@ public class RequestHandler implements Runnable {
             HttpRequest request = new HttpRequest(httpRequestString);
             HttpResponse response = new HttpResponse();
 
-            // UserController 인스턴스 생성
-            UserController userController = new UserController();
+            RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
+            Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
 
-            // 요청 경로에 따라 처리
-            if (request.getPath().startsWith("/user/create")) {
-                userController.createUser(request, response);
+            if (method != null) {
+                // 매핑된 컨트롤러 메서드 호출
+                invokeControllerMethod(method, request, response);
             } else {
-                // 정적 파일 처리를 StaticFileUtils를 사용하여 처리합니다.
+                // 정적 파일 처리 또는 404 Not Found 처리
                 StaticFileUtils.handleStaticFile(request.getPath(), response);
             }
 
             // 응답 전송
             response.send(dos);
         } catch (IOException e) {
-            logger.error("Error processing request: ", e);
+            logger.error("요청 처리 에러: ", e);
+        }
+    }
+
+    private void invokeControllerMethod(Method method, HttpRequest request, HttpResponse response) {
+        try {
+            method.invoke(userController, request, response);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("컨트롤러 메서드 호출 에러", e);
         }
     }
 }

@@ -36,7 +36,8 @@ public class UserController {
 
         if (user != null && user.getPassword().equals(password)) {
             String sessionId = UUID.randomUUID().toString(); // 세션 ID 생성
-            SessionStorage.addSession(sessionId, user); // 세션 저장소에 사용자 정보 저장
+            SessionStorage sessionStorage = SessionStorage.getInstance();
+            sessionStorage.addSession(sessionId, user); // 세션 저장소에 사용자 정보 저장
 
             response.setHeader("Set-Cookie", "sid=" + sessionId + "; Path=/; HttpOnly"); // 쿠키 설정
             response.setStatusCode(302);

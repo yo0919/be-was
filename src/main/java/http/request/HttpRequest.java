@@ -2,7 +2,7 @@ package http.request;
 
 import http.enums.HttpMethod;
 import http.request.parser.HttpRequestParser;
-
+import http.request.parser.RequestCookieParser;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,8 +45,10 @@ public class HttpRequest {
     }
 
     public String getSessionId() {
-        return cookies != null ? cookies.get("sid") : null;
+        Map<String, String> cookies = RequestCookieParser.parseCookies(this.headers.get("Cookie"));
+        return cookies.get("sid");
     }
+
     // Setter
     public void setMethod(String method) {
         this.method = method;

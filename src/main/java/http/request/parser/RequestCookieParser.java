@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestCookieParser {
-    public static Map<String, String> parse(String cookieHeader) {
+    public static Map<String, String> parseCookies(String cookieHeader) {
         Map<String, String> cookies = new HashMap<>();
         if (cookieHeader != null && !cookieHeader.isEmpty()) {
             String[] pairs = cookieHeader.split(";");

@@ -18,7 +18,7 @@ public class HttpRequestParser {
 
         // 쿠키 파싱
         String cookieHeader = request.getHeaders().get("Cookie");
-        Map<String, String> cookies = RequestCookieParser.parse(cookieHeader);
+        Map<String, String> cookies = RequestCookieParser.parseCookies(cookieHeader);
         request.setCookies(cookies);
 
         // 요청 바디 파싱

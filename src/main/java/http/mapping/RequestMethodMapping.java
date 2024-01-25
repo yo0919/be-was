@@ -1,4 +1,4 @@
-package controller.mapping;
+package http.mapping;
 
 import java.lang.reflect.Method;
 

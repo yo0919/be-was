@@ -1,4 +1,4 @@
-package session;
+package http;
 
 import model.User;
 import java.util.Map;

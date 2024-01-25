@@ -1,4 +1,4 @@
-package controller.mapping;
+package http.mapping;
 
 import http.enums.HttpMethod;
 import http.annotation.GetMapping;

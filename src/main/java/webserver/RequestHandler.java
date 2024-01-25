@@ -1,7 +1,7 @@
 package webserver;
 
-import controller.mapping.ControllerMethodMapper;
-import controller.mapping.RequestMappingInfo;
+import http.mapping.ControllerMethodMapper;
+import http.mapping.RequestMappingInfo;
 import controller.UserController;
 import http.request.HttpRequest;
 import http.response.HttpResponse;

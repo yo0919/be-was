@@ -4,9 +4,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import http.mapping.ControllerMethodMapper;
-import controller.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +13,6 @@ public class WebServer {
     private static final int THREAD_POOL_SIZE = 50; // 스레드 풀 사이즈 설정
 
     public static void main(String args[]) throws Exception {
-        UserController userController = new UserController();
-        ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
-        controllerMethodMapper.scan(userController);
 
         int port = 0;
         if (args == null || args.length == 0) {
@@ -34,7 +28,7 @@ public class WebServer {
 
             while (true) {
                 Socket connection = listenSocket.accept();
-                executorService.execute(new RequestHandler(connection, controllerMethodMapper, userController));
+                executorService.execute(new RequestHandler(connection));
             }
         } finally {
             executorService.shutdown();

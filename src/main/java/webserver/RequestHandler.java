@@ -18,14 +18,11 @@ import java.net.Socket;
 public class RequestHandler implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
     private final Socket connection;
-    private final ControllerMethodMapper controllerMethodMapper;
-    private final UserController userController;
 
-    public RequestHandler(Socket connectionSocket, ControllerMethodMapper controllerMethodMapper, UserController userController) {
+    public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
-        this.controllerMethodMapper = controllerMethodMapper;
-        this.userController = userController;
     }
+
     public void run() {
         logger.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
@@ -35,12 +32,16 @@ public class RequestHandler implements Runnable {
             HttpRequest request = new HttpRequest(httpRequestString);
             HttpResponse response = new HttpResponse();
 
+            ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
+            UserController userController = new UserController();
+            controllerMethodMapper.scan(userController);
+
             RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
             Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
 
             if (method != null) {
                 // 매핑된 컨트롤러 메서드 호출
-                invokeControllerMethod(method, request, response);
+                invokeControllerMethod(method, userController, request, response);
             } else {
                 // 정적 파일 처리 또는 404 Not Found 처리
                 StaticFileUtils.handleStaticFile(request.getPath(), response);
@@ -53,7 +54,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void invokeControllerMethod(Method method, HttpRequest request, HttpResponse response) {
+    private void invokeControllerMethod(Method method, UserController userController, HttpRequest request, HttpResponse response) {
         try {
             method.invoke(userController, request, response);
         } catch (IllegalAccessException | InvocationTargetException e) {

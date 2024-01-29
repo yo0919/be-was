@@ -24,7 +24,6 @@ public class StaticFileUtils {
 
     public static void handleStaticFile(String url, HttpResponse response) throws IOException {
         String filePath = determineFilePath(url);
-        logger.debug("Requested file path: {}", filePath);
         String fileExtension = getFileExtension(filePath);
         byte[] body = FileUtils.readFile(filePath);
 

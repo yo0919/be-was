@@ -26,7 +26,6 @@ public class UserController {
         String email = formData.get("email");
 
         User user = userService.registerUser(userId, password, name, email);
-        System.out.println("user: " + user);
 
         // 회원가입 성공 후 리디렉션 응답 설정
         response.setStatusCode(302);

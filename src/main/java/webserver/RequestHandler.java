@@ -15,6 +15,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+
 import http.response.handler.LoginResponseHandler;
 
 public class RequestHandler implements Runnable {
@@ -43,23 +45,31 @@ public class RequestHandler implements Runnable {
             // 요청에 따른 로그인 상태 처리
             loginResponseHandler.handle(request, response);
 
-            ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
-            UserController userController = new UserController();
-            controllerMethodMapper.scan(userController);
+            if (response.getBody() == null) {
+                // 로그인 처리 후에도 응답 본문이 설정되지 않은 경우에만 정적 파일 처리 수행
+                ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
+                UserController userController = new UserController();
+                controllerMethodMapper.scan(userController);
 
-            RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
-            Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
+                RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
+                Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
 
-            if (method != null) {
-                // 매핑된 컨트롤러 메서드 호출
-                invokeControllerMethod(method, userController, request, response, loggedInuser); // 사용자 정보 추가 전달
-            } else {
-                // 정적 파일 처리 또는 404 Not Found 처리
-                StaticFileUtils.handleStaticFile(request.getPath(), response);
+                if (method != null) {
+                    // 매핑된 컨트롤러 메서드 호출
+                    invokeControllerMethod(method, userController, request, response, loggedInuser);
+                } else {
+                    // 정적 파일 처리 또는 404 Not Found 처리
+                    StaticFileUtils.handleStaticFile(request.getPath(), response);
+                }
+            }
+
+            if (response.getBody() != null) {
+                logger.debug("Preparing to send response to client. Response body: {}", new String(response.getBody(), StandardCharsets.UTF_8));
             }
 
             // 응답 전송
             response.send(dos);
+            logger.debug("Response sent to client");
         } catch (IOException e) {
             logger.error("요청 처리 에러: ", e);
         }

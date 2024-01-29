@@ -7,6 +7,11 @@ import http.response.HttpResponse;
 import model.User;
 import service.UserService;
 import http.session.SessionStorage;
+import utils.FileUtils;
+import utils.UserHtmlConverter;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public class UserController {
@@ -63,5 +68,35 @@ public class UserController {
         }
         response.setStatusCode(302);
         response.setHeader("Location", "/index.html");
+    }
+
+    @GetMapping("/user/list")
+    public void listUsers(HttpRequest request, HttpResponse response) {
+        String sessionId = request.getSessionId();
+        if (sessionId == null || SessionStorage.getInstance().getUserBySessionId(sessionId) == null) {
+            // 로그인하지 않은 경우 로그인 페이지로 리디렉션
+            response.setStatusCode(302);
+            response.setHeader("Location", "/user/login.html");
+        } else {
+            try {
+                // 로그인한 경우 사용자 목록 출력
+                List<User> users = userService.getAllUsers();
+                String userHtml = UserHtmlConverter.convertUsersToHtml(users);
+
+                // 기존 HTML 템플릿 파일 로드
+                String templateHtml = FileUtils.readFileAsString("templates/user/list.html");
+
+                // 사용자 목록을 삽입할 위치 찾기
+                String finalHtml = templateHtml.replace("<!-- UserList -->", userHtml);
+
+                // 최종 HTML 문서를 응답으로 전송
+                response.setBody(finalHtml.getBytes());
+                response.setHeader("Content-Type", "text/html");
+            } catch (IOException e) {
+                // IOException 처리
+                response.setStatusCode(500); // 내부 서버 오류
+                response.setBody("Internal server error".getBytes());
+            }
+        }
     }
 }

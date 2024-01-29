@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import http.response.handler.LoginResponseHandler;
 
@@ -77,16 +78,20 @@ public class RequestHandler implements Runnable {
 
     private void invokeControllerMethod(Method method, UserController userController, HttpRequest request, HttpResponse response, User loggedInUser) {
         try {
-            // 메서드의 이름에 따라 필요한 매개변수를 전달합니다.
-            if (method.getName().equals("createUser") || method.getName().equals("login")) {
-                // createUser와 login 메서드는 HttpRequest, HttpResponse만 필요
-                method.invoke(userController, request, response);
-            } else {
-                // 다른 메서드들은 추가적으로 User 객체도 필요
+            // 메서드가 필요로 하는 매개변수 타입들을 가져옵니다.
+            Class<?>[] parameterTypes = method.getParameterTypes();
+
+            // 필요한 매개변수에 따라 적절한 인자들을 전달합니다.
+            if (Arrays.asList(parameterTypes).contains(User.class)) {
+                // User 객체가 필요한 경우
                 method.invoke(userController, request, response, loggedInUser);
+            } else {
+                // User 객체가 필요하지 않은 경우
+                method.invoke(userController, request, response);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("컨트롤러 메서드 호출 에러", e);
         }
     }
+
 }

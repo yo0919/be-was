@@ -1,5 +1,6 @@
 package controller;
 
+import http.annotation.GetMapping;
 import http.annotation.PostMapping;
 import http.request.HttpRequest;
 import http.response.HttpResponse;
@@ -51,5 +52,16 @@ public class UserController {
             response.setStatusCode(302);
             response.setHeader("Location", "/user/login_failed.html");
         }
+    }
+
+    @GetMapping("/user/logout")
+    public void logout(HttpRequest request, HttpResponse response) {
+        String sessionId = request.getSessionId();
+        if (sessionId != null) {
+            SessionStorage.getInstance().removeSession(sessionId);
+            response.setHeader("Set-Cookie", "sid=; Path=/; Max-Age=0");
+        }
+        response.setStatusCode(302);
+        response.setHeader("Location", "/index.html");
     }
 }

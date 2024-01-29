@@ -18,6 +18,11 @@ public class SessionStorage {
         sessions.put(sessionId, user);
     }
 
+    // 세션을 제거하는 메서드
+    public void removeSession(String sessionId) {
+        sessions.remove(sessionId);
+    }
+
     public User getUserBySessionId(String sessionId) {
         return sessions.get(sessionId);
     }

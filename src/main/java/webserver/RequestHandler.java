@@ -67,7 +67,7 @@ public class RequestHandler implements Runnable {
             // 응답 전송
             response.send(dos);
         } catch (IOException e) {
-            logger.error("요청 처리 에러: ", e);
+            logger.error("요청 처리 에러:", e);
         }
     }
 

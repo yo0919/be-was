@@ -99,4 +99,18 @@ public class UserController {
             }
         }
     }
+
+    @GetMapping("/qna/form")
+    public void showQuestionForm(HttpRequest request, HttpResponse response) {
+        String sessionId = request.getSessionId();
+        if (sessionId == null || SessionStorage.getInstance().getUserBySessionId(sessionId) == null) {
+            // 로그인하지 않은 경우 로그인 페이지로 리디렉션
+            response.setStatusCode(302);
+            response.setHeader("Location", "/user/login.html");
+        } else {
+            // 로그인한 경우 QnA 폼 페이지로 리디렉션
+            response.setStatusCode(302);
+            response.setHeader("Location", "/qna/form.html");
+        }
+    }
 }

@@ -3,13 +3,10 @@ package utils;
 import http.response.HttpResponse;
 import http.enums.Mime;
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
 public class StaticFileUtils {
-    private static final Logger logger = LoggerFactory.getLogger(StaticFileUtils.class);
     private static final String TEMPLATE_ROOT = "src/main/resources/templates";
     private static final String STATIC_ROOT = "src/main/resources/static";
     private static final Set<String> STATIC_PATHS = new HashSet<>();

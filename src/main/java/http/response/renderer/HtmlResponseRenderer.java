@@ -1,10 +1,8 @@
 package http.response.renderer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import utils.FileUtils;
 public class HtmlResponseRenderer {
-    private static final Logger logger = LoggerFactory.getLogger(HtmlResponseRenderer.class);
+
     public static String renderHtmlWithUserName(String filePath, String userName) {
         try {
             String htmlContent = FileUtils.readFileAsString(filePath);
@@ -25,11 +23,8 @@ public class HtmlResponseRenderer {
                     .replaceAll("<li><a href=\"user/form.html\" role=\"button\">회원가입</a></li>", "");
 
 
-            // 로그 출력
-            logger.debug("Transformed HTML: {}", htmlContent);
             return htmlContent;
         } catch (Exception e) {
-            logger.error("Error rendering HTML with user name", e);
             return "Error loading page";
         }
     }

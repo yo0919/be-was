@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SessionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(SessionHandler.class);
 
     public User checkSession(HttpRequest request) {
         String sessionId = request.getSessionId();

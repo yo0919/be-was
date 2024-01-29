@@ -64,13 +64,8 @@ public class RequestHandler implements Runnable {
                 }
             }
 
-            if (response.getBody() != null) {
-                logger.debug("Preparing to send response to client. Response body: {}", new String(response.getBody(), StandardCharsets.UTF_8));
-            }
-
             // 응답 전송
             response.send(dos);
-            logger.debug("Response sent to client");
         } catch (IOException e) {
             logger.error("요청 처리 에러: ", e);
         }

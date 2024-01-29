@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 
 public class ControllerMethodMapper {
     private final Map<RequestMappingInfo, Method> mappings = new HashMap<>();
-    private static final Logger logger = LoggerFactory.getLogger(ControllerMethodMapper.class);
 
     public void scan(Object controller) {
         Class<?> clazz = controller.getClass();

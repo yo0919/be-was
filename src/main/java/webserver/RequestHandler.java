@@ -1,22 +1,24 @@
 package webserver;
 
+import controller.HomePageController;
 import controller.PostController;
 import http.mapping.ControllerMethodMapper;
 import http.mapping.RequestMappingInfo;
 import controller.UserController;
 import http.request.HttpRequest;
 import http.response.HttpResponse;
+import http.session.SessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import utils.HttpUtils;
 import utils.StaticFileUtils;
-import http.session.SessionHandler;
 import model.User;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.Arrays;
+import service.HomePageService;
 
 import http.response.handler.LoginResponseHandler;
 
@@ -41,33 +43,41 @@ public class RequestHandler implements Runnable {
 
             // 세션 확인 및 사용자 정보 조회
             SessionHandler sessionHandler = new SessionHandler();
-            User loggedInuser = sessionHandler.checkSession(request);
+            User loggedInUser = sessionHandler.checkSession(request); // 로그인한 사용자 정보를 가져옵니다.
 
             // 요청에 따른 로그인 상태 처리
             loginResponseHandler.handle(request, response);
 
             if (response.getBody() == null) {
-                // 로그인 처리 후에도 응답 본문이 설정되지 않은 경우에만 정적 파일 처리 수행
                 ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
                 UserController userController = new UserController();
-                PostController postController = new PostController();
+                HomePageService homePageService = new HomePageService();
+
+                PostController postController = new PostController(homePageService);
+                HomePageController homePageController = new HomePageController(homePageService);
 
                 controllerMethodMapper.scan(userController);
                 controllerMethodMapper.scan(postController);
+                controllerMethodMapper.scan(homePageController);
+
 
                 RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
                 Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
 
                 if (method != null) {
-                    // method.getDeclaringClass()를 사용하여 어떤 클래스의 메서드인지 확인합니다.
+                    Object controller = null;
                     if (method.getDeclaringClass().equals(UserController.class)) {
-                        invokeControllerMethod(method, userController, request, response, loggedInuser); // 변수 이름 수정
+                        controller = userController;
                     } else if (method.getDeclaringClass().equals(PostController.class)) {
-                        invokeControllerMethod(method, postController, request, response, null);
-                        logger.debug("포스트컨트롤러 호출");
+                        controller = postController;
+                    } else if (method.getDeclaringClass().equals(HomePageController.class)) {
+                        controller = homePageController;
+                    }
+
+                    if (controller != null) {
+                        invokeControllerMethod(method, controller, request, response, loggedInUser);
                     }
                 } else {
-                    // 정적 파일 처리 또는 404 Not Found 처리
                     StaticFileUtils.handleStaticFile(request.getPath(), response);
                 }
             }

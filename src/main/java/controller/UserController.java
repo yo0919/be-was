@@ -52,7 +52,7 @@ public class UserController {
 
             response.setHeader("Set-Cookie", "sid=" + sessionId + "; Path=/; HttpOnly");
             response.setStatusCode(302);
-            response.setHeader("Location", "/index.html");
+            response.setHeader("Location", "/");
         } else {
             response.setStatusCode(302);
             response.setHeader("Location", "/user/login_failed.html");
@@ -67,7 +67,7 @@ public class UserController {
             response.setHeader("Set-Cookie", "sid=; Path=/; Max-Age=0");
         }
         response.setStatusCode(302);
-        response.setHeader("Location", "/index.html");
+        response.setHeader("Location", "/");
     }
 
     @GetMapping("/user/list")

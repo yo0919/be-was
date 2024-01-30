@@ -24,9 +24,7 @@ public class ControllerMethodMapper {
                 .flatMap(method -> Stream.of(GetMapping.class, PostMapping.class)
                         .filter(annotationClass -> method.isAnnotationPresent(annotationClass))
                         .map(annotationClass -> createMappingInfo(method, annotationClass)))
-                .forEach(mappingInfo -> {
-                    mappings.put(mappingInfo.getRequestMappingInfo(), mappingInfo.getMethod());
-                });
+                .forEach(mappingInfo -> mappings.put(mappingInfo.getRequestMappingInfo(), mappingInfo.getMethod()));
     }
 
     private RequestMethodMapping createMappingInfo(Method method, Class<? extends Annotation> annotationClass) {
@@ -50,7 +48,6 @@ public class ControllerMethodMapper {
     }
 
     public Method getMappedMethod(RequestMappingInfo requestMappingInfo) {
-        Method method = mappings.get(requestMappingInfo);
-        return method;
+        return mappings.get(requestMappingInfo);
     }
 }

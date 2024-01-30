@@ -8,7 +8,7 @@ public class HtmlResponseRenderer {
             String htmlContent = FileUtils.readFileAsString(filePath);
 
             // 환영 문구를 먼저 추가
-            String userGreeting = "<li class=\"nav-item welcome-message\">안녕하세요, 전용호님!</li>\n";
+            String userGreeting = "<li class=\"nav-item welcome-message\">안녕하세요, "+userName+"님!</li>\n";
 
             // "Posts" 버튼과 환영 문구의 순서를 변경
             htmlContent = htmlContent.replaceFirst(

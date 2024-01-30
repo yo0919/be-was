@@ -1,5 +1,6 @@
 package webserver;
 
+import controller.PostController;
 import http.mapping.ControllerMethodMapper;
 import http.mapping.RequestMappingInfo;
 import controller.UserController;
@@ -15,7 +16,6 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import http.response.handler.LoginResponseHandler;
@@ -50,14 +50,22 @@ public class RequestHandler implements Runnable {
                 // 로그인 처리 후에도 응답 본문이 설정되지 않은 경우에만 정적 파일 처리 수행
                 ControllerMethodMapper controllerMethodMapper = new ControllerMethodMapper();
                 UserController userController = new UserController();
+                PostController postController = new PostController();
+
                 controllerMethodMapper.scan(userController);
+                controllerMethodMapper.scan(postController);
 
                 RequestMappingInfo requestMappingInfo = new RequestMappingInfo(request.getPath(), request.getHttpMethod());
                 Method method = controllerMethodMapper.getMappedMethod(requestMappingInfo);
 
                 if (method != null) {
-                    // 매핑된 컨트롤러 메서드 호출
-                    invokeControllerMethod(method, userController, request, response, loggedInuser);
+                    // method.getDeclaringClass()를 사용하여 어떤 클래스의 메서드인지 확인합니다.
+                    if (method.getDeclaringClass().equals(UserController.class)) {
+                        invokeControllerMethod(method, userController, request, response, loggedInuser); // 변수 이름 수정
+                    } else if (method.getDeclaringClass().equals(PostController.class)) {
+                        invokeControllerMethod(method, postController, request, response, null);
+                        logger.debug("포스트컨트롤러 호출");
+                    }
                 } else {
                     // 정적 파일 처리 또는 404 Not Found 처리
                     StaticFileUtils.handleStaticFile(request.getPath(), response);
@@ -71,7 +79,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void invokeControllerMethod(Method method, UserController userController, HttpRequest request, HttpResponse response, User loggedInUser) {
+    private void invokeControllerMethod(Method method, Object controller, HttpRequest request, HttpResponse response, User loggedInUser) {
         try {
             // 메서드가 필요로 하는 매개변수 타입들을 가져옵니다.
             Class<?>[] parameterTypes = method.getParameterTypes();
@@ -79,14 +87,13 @@ public class RequestHandler implements Runnable {
             // 필요한 매개변수에 따라 적절한 인자들을 전달합니다.
             if (Arrays.asList(parameterTypes).contains(User.class)) {
                 // User 객체가 필요한 경우
-                method.invoke(userController, request, response, loggedInUser);
+                method.invoke(controller, request, response, loggedInUser);
             } else {
                 // User 객체가 필요하지 않은 경우
-                method.invoke(userController, request, response);
+                method.invoke(controller, request, response);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException("컨트롤러 메서드 호출 에러", e);
         }
     }
-
 }
